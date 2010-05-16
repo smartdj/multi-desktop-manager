@@ -44,7 +44,7 @@ Search Detours in Google.
    ；以下是Target函数的继续部分
    ……
 
-拦截后： Target _ Function：
+拦截后： Target _ Function:
    jmp   Detour_Function
    Trampoline:
    ；以下是Target函数的继续部分
@@ -95,7 +95,7 @@ Search Detours in Google.
 
 三． 程序实例 
 
----- 以一个能使有“调试程序”的用户权限的用户成为系统管理员的程序做例子说明Detours 库函数的用法。程序的设计思路是找一个以System帐号运行的进程，如spoolss.exe, rpcss.exe, winlogon.exe, service.exe等，使用ContinueProcessWithDll在其中注入把当前用户加入到 Administrators本地组的DLL，因为该DLL在这些进程的安全上下文环境运行，所以有相应的权限。 
+---- 以一个能使有“调试程序”的用户权限的用户成为系统管理员的程序做例子说明Detours 库函数的用法。程序的设计思路是找一个以System帐号运行的进程，如spoolss.exe,rpcss.exe,winlogon.exe, service.exe等，使用ContinueProcessWithDll在其中注入把当前用户加入到 Administrators本地组的DLL，因为该DLL在这些进程的安全上下文环境运行，所以有相应的权限。 
 
 ---- 先编写相应的DLL： 
 
@@ -229,7 +229,7 @@ if (argc!=2){
 }
 nProcessId = _wtoi(argv[1]);
 printf("%d ",nProcessId);
----- /*要成功执行ContinueProcessWithDll，要对winlogon.exe等进程的进程句柄有读写存储器内容和创建线程的权限，EnablePrivilege使本进程有这样的权利。*/ 
+---- /*要成功执行ContinueProcessWithDll,要对winlogon.exe等进程的进程句柄有读写存储器内容和创建线程的权限，EnablePrivilege使本进程有这样的权利。*/ 
 
 if (!EnablePrivilege(SE_DEBUG_NAME, TRUE)){
    printf("AdjustTokenPrivilege Fail %u ",
