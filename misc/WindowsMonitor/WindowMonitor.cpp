@@ -15,7 +15,7 @@ WindowMonitor* g_pThis = 0;
 //--------------------------------------------------------------------
 WindowMonitor::WindowMonitor()
 :
-m_uiEnumInterval( 5000 )
+m_uiEnumInterval( 2000 )
 {
 }
 WindowMonitor::~WindowMonitor()
