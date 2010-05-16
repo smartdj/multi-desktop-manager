@@ -1,0 +1,1 @@
+This is a NamedPipe Server.

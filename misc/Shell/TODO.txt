@@ -1,0 +1,37 @@
+# Author:angelipin
+# Email: angelipin@126.com
+MiniVE的Shell
+1. 功能
+   CreateNewVE    创建一个新的VE
+   SwitchToVE     切换到VE
+   CloseVE        关闭VE
+   DeleteVE       删除VE
+   ResetVE        重置VE
+   LoadVE         加载VE
+   OpenVE         打开VE
+   RenameVE       重命名VE
+   LoginVE        登陆
+   RestartVE      重启
+   VEVersion      显示版本号
+   CopyFile       在VE之间拷贝文件
+   ProcessList    显示当前VE下的进程
+   ClearScreen    清屏
+   Excute         执行程序(在指定VE中运行可执行文件)
+   CurrentTime    当前系统时间
+   UserName       当前用户名
+   PassWord       密码
+       
+   ... ...
+
+2. 基本语法
+   
+   if
+   for
+   foreach
+   while
+   ! not and or 
+3. 设想
+   不考虑指针
+   引用
+   函数传递的时候关键字指定是引用还是copy
+   
