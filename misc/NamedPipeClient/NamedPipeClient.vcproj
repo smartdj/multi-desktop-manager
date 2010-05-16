@@ -187,6 +187,10 @@
 			RelativePath=".\ReadMe.txt"
 			>
 		</File>
+		<File
+			RelativePath=".\TODO.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
