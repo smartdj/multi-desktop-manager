@@ -62,7 +62,7 @@ Search Detours in Google.
 
 ---- 以下是其步骤： 
 
----- (1) 创建一个ThreadFuction，内容仅是调用LoadLibrary。 
+---- (1) 创建一个ThreadFuction,内容仅是调用LoadLibrary。 
 ---- (2) 用VirtualAllocEx为一个已在运行的进程分配一片虚存，并把权限更改为可读可写可执行。 
 ---- (3) 把ThreadFuction的二进制机器码写入这片虚存。 
 ---- (4) 用CreateRemoteThread在该进程上创建一个线程，传入前面分配的虚存的起始地址作为线程函数的地址，即可为一个已在运行的进程装入一个DLL。通过DllMain 即可在一个已在运行的进程中运行自己的代码。 
@@ -74,7 +74,7 @@ Search Detours in Google.
 ---- 1． PBYTE WINAPI DetourFindFunction(PCHAR pszModule, PCHAR pszFunction) 
 
 ---- 功能：从一DLL中找出一函数的入口地址 
----- 参数：pszModule是DLL名，pszFunction是函数名。 
+---- 参数：pszModule是DLL名,pszFunction是函数名。 
 ---- 返回：名为pszModule的DLL的名为pszFunction的函数的入口地址 
 ---- 说明：DetourFindFunction除使用GetProcAddress外，还直接分析DLL的文件头，因此可以找到一些GetProcAddress找不到的函数入口。 
 
