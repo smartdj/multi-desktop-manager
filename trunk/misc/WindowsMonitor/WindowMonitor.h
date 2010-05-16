@@ -28,7 +28,7 @@ public:
 	virtual ~WindowMonitor();
 public:
 	//Type define
-	typedef std::map< std::wstring, bool > TitleMap;
+	typedef std::map< HWND, bool > TitleMap;
 public:
 	//Structure
 	struct WindowAttribute
@@ -75,7 +75,6 @@ public:
 	static unsigned int __stdcall EnumStationCallback( wchar_t* name, unsigned int param );
 	static unsigned int __stdcall EnumDesktopWindowsCallback( HWND hwnd, unsigned int param );
 	static void __stdcall TimerCallback( HWND, UINT, UINT_PTR, DWORD );
-	static void __stdcall CleanHwnd( HWND, UINT, UINT_PTR, DWORD );
 public:
 	//
 	void SetEnumInterval( unsigned int interval )	{ m_uiEnumInterval = interval; }
@@ -90,5 +89,4 @@ protected:
 	HWINSTA				m_hWindowStation;
 	XMLLog				m_Log;
 	unsigned int		m_uiEnumInterval;
-	std::wstring		m_strPipename;
 };
