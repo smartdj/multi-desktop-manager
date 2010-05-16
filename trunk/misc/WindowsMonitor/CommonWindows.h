@@ -97,6 +97,6 @@ inline int CreateUniqueInstance( const std::wstring& mutex )
 		iReturn = 0;
 	}
 Exit:
-	CloseHandle(hMutex);
+	//CloseHandle(hMutex); This should never close if you want to keep unique instance;
 	return iReturn;
 }
