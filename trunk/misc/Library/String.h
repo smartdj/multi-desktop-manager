@@ -1,5 +1,0 @@
-#include <string>
-namespace oo
-{
-	
-}
