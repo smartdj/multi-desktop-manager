@@ -29,7 +29,7 @@ namespace Serializer
 		{
 			return this->Prameters;
 		}
-		std::string Serialize(BaseClass & obj)
+		std::string Serialize()
 		{
 
 		}
