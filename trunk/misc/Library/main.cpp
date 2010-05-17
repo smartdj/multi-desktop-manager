@@ -1,7 +1,6 @@
 //// Algorithms.cpp : Defines the entry point for the console application.
 ////
 //
-#include "stdafx.h"
 //#include "Algorythms.h"
 //#include "System.h"
 //#include <windows.h>
@@ -159,14 +158,142 @@
 //}
 #include "Algorythms.h"
 #include "System.h"
+#include "Reflection.h"
+
+
+
+/*****************************************************************************
+    MAIN
+ *****************************************************************************/
+
+
+#include <list>
+#include <string>
+#include <iostream>
+using namespace std;
+using namespace agm::reflection;
+
+
+void print_class(const Class &pclass)
+{
+    cout << "class name = " << pclass.getName() << endl;
+
+    cout << "superclass = ";
+    if (pclass.hasSuper()) cout << pclass.getSuper().getName();
+    else cout << "none";
+    cout << endl;
+
+    cout << "fields:\n";
+    for(Class::FieldList::const_iterator itField = pclass.getFields().begin();
+        itField != pclass.getFields().end();
+        ++itField)
+    {
+        const Field &field = *itField;
+        cout << "    " << field.getAccess() << " " << field.getType() << " " << field.getName() << endl;
+    }
+
+    cout << "static fields:\n";
+    for(Class::StaticFieldList::const_iterator itStaticField = pclass.getStaticFields().begin();
+        itStaticField != pclass.getStaticFields().end();
+        ++itStaticField)
+    {
+        const StaticField &field = *itStaticField;
+        cout << "    " << field.getAccess() << " " << field.getType() << " " << field.getName() << endl;
+    }
+
+    cout << "methods:\n";
+    for(Class::MethodList::const_iterator itMethod = pclass.getMethods().begin();
+        itMethod != pclass.getMethods().end();
+        ++itMethod)
+    {
+        const Method &method = *itMethod;
+        cout << "    " << method.getAccess();
+        if (method.isVirtual()) cout << " " << "virtual";
+        cout << " " << method.getType() << " " << method.getName() << method.getArgs() << endl;
+    }
+
+    cout << "properties:\n";
+    for(Class::PropertyList::const_iterator itProperty = pclass.getProperties().begin();
+        itProperty != pclass.getProperties().end();
+        ++itProperty)
+    {
+        const Property &property = *itProperty;
+        cout << "    " << property.getType() << " " << property.getName() << endl;
+    }
+
+    cout << "\n-----------------------------------------------------------\n";
+}
+
+
+class Foo {
+public:
+    CLASS(Foo, agm::reflection::NullClass);
+
+    PROPERTY(int, length);
+
+    METHOD(public, int, action, ()) {
+        cout << "Foo::action();\n";
+		return 0;
+    }
+
+    METHOD(public, void, action1, (int i)) {
+        cout << "Foo::action1(" << i << ");\n";
+    }
+
+    STATIC_METHOD(public, int, get_code, ()) {
+        cout << "Foo::get_code();\n";
+        return 1;
+    }
+
+    STATIC_METHOD(public, int, get_code1, (int i)) {
+        cout << "Foo::get_code1(" << i << ");\n";
+        return i + 1;
+    }
+
+    STATIC_METHOD(public, void, print_code, ()) {
+        cout << "Foo::print_code();\n";
+    }
+
+    STATIC_METHOD(public, void, print_code1, (int i)) {
+        cout << "Foo::print_code1(" << i << ");\n";
+    }
+
+    Foo() {
+        m_length = 0;
+    }
+
+private:
+    int m_length;
+
+    int get_length() const {
+        cout << "get_length();\n";
+        return m_length;
+    }
+
+    void set_length(int l) {
+        cout << "set_length(" << l << ");\n";
+        m_length = l;
+    }
+};
+
+
+class Bar {
+public:
+    CLASS(Bar, agm::reflection::NullClass);
+};
+
+#include "libxml.h" 
 int main()
 {
-	/*int l[] = {12,2341,43524,43523,123,65456,321431,2343,43,32,4,54};
-	double h[] = {0.04,0.02,0.03,0.06,0.14,0.12,0.11,0.09,0.15,0.20,0.03,0.01};
-	int r[12];
-	Algorythms::Average_Minimum_Query_Time(l,h,r,12);
-	System::Console::print(r,12);	*/
-	Algorythms::Template::Graphic G = Algorythms::Template::Graphic();
+	TiXmlDocument doc;
+	
+    Foo foo1;
+    const Class &foo_class = foo1.getClass();
+    print_class(foo_class);
+	int x;
+	foo1.getClass().getMethod("action").invoke(x,&foo1);
+	foo_class.getMethod("action1").invokeVoid(&foo1,3);
+    Algorythms::Template::Graphic G = Algorythms::Template::Graphic();
 	G.AddEdge(0,1,4);
 	G.AddEdge(0,7,8);
 	G.AddEdge(1,2,8);
@@ -185,5 +312,6 @@ int main()
 	Algorythms::Template::Graphic mst = Algorythms::Template::MST_KRUSKAL(G);
 
 	System::pause();
-	return 0;
+    return 0;
 }
+
