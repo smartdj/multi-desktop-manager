@@ -10,7 +10,7 @@ namespace Serializer
 		std::string MethodName;
 		std::string NameSpace;
 		Dictionary Prameters;
-
+		
 	public:
 		std::string GetClass()
 		{
