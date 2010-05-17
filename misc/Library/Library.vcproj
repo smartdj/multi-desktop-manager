@@ -217,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\String.h"
+				>
+			</File>
+			<File
 				RelativePath=".\System.h"
 				>
 			</File>
