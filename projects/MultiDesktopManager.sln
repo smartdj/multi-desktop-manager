@@ -35,8 +35,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SwitchDesktopEx", "..\Sampl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Library", "..\misc\Library\Library.vcproj", "{692FAE61-1D85-4A1A-BDA7-5D9E985EC047}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MutilDesktopManager", "MutilDesktopManager\MutilDesktopManager.vcproj", "{9C45CC85-EBED-4D2F-8D70-7C2C37430526}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowsMonitor", "..\misc\WindowsMonitor\WindowsMonitor.vcproj", "{9AE36814-F2CC-439F-9A5B-09F9753EAD77}"
 EndProject
 Global
@@ -105,10 +103,6 @@ Global
 		{692FAE61-1D85-4A1A-BDA7-5D9E985EC047}.Debug|Win32.Build.0 = Debug|Win32
 		{692FAE61-1D85-4A1A-BDA7-5D9E985EC047}.Release|Win32.ActiveCfg = Release|Win32
 		{692FAE61-1D85-4A1A-BDA7-5D9E985EC047}.Release|Win32.Build.0 = Release|Win32
-		{9C45CC85-EBED-4D2F-8D70-7C2C37430526}.Debug|Win32.ActiveCfg = Debug|Win32
-		{9C45CC85-EBED-4D2F-8D70-7C2C37430526}.Debug|Win32.Build.0 = Debug|Win32
-		{9C45CC85-EBED-4D2F-8D70-7C2C37430526}.Release|Win32.ActiveCfg = Release|Win32
-		{9C45CC85-EBED-4D2F-8D70-7C2C37430526}.Release|Win32.Build.0 = Release|Win32
 		{9AE36814-F2CC-439F-9A5B-09F9753EAD77}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9AE36814-F2CC-439F-9A5B-09F9753EAD77}.Debug|Win32.Build.0 = Debug|Win32
 		{9AE36814-F2CC-439F-9A5B-09F9753EAD77}.Release|Win32.ActiveCfg = Release|Win32
