@@ -237,7 +237,7 @@ int WindowMonitor::EnumNewWindows(	const wstring& name,
 			wchar_t strWindowText[ uiBufferSize ];
 			ZeroMemory( strWindowText, sizeof( wchar_t )*uiBufferSize );
 			int ret = GetWindowText( cur_iter->first, strWindowText, uiBufferSize );
-			if(!ret)
+			if(ret)
 			{
 				
 				WindowAttribute waTemp;
