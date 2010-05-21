@@ -1,4 +1,4 @@
-#include "NamedPipeWrapper.h"
+#include "NamedPipeServer.h"
 int main()
 {
 	return 0;

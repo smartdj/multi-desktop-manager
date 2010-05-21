@@ -2,6 +2,7 @@
 #include <string>
 class NamedPipeWrapper
 {
+public:
 	NamedPipeWrapper(HANDLE hpipe)
 	{
 		this->pipehandle = hpipe;
