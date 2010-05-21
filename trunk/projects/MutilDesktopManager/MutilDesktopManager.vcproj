@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="MutilDesktopManager"
+	Name="MultiDesktopManager"
 	ProjectGUID="{9C45CC85-EBED-4D2F-8D70-7C2C37430526}"
 	RootNamespace="MutilDesktopManager"
 	Keyword="Win32Proj"
